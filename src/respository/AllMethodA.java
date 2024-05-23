@@ -241,38 +241,43 @@ class CourseManager implements AllFunction {
     public void findCourseByTitle() {
         try (Scanner scanner = new Scanner(System.in)) {
             System.out.print("Enter the course title to find: ");
-            String titleToFind = scanner.nextLine();
-            List<Course> courseList = readCoursesFromFile(FILE_PATH);
+            if (scanner.hasNextLine()) {
+                String titleToFind = scanner.nextLine();
+                List<Course> courseList = readCoursesFromFile(FILE_PATH);
 
-            Optional<Course> foundCourse = courseList.stream()
-                    .filter(c -> c.getTitle().equalsIgnoreCase(titleToFind))
-                    .findFirst();
+                Optional<Course> foundCourse = courseList.stream()
+                        .filter(c -> c.getTitle().equalsIgnoreCase(titleToFind))
+                        .findFirst();
 
-            if (foundCourse.isPresent()) {
-                Table table = new Table(5, BorderStyle.UNICODE_BOX_DOUBLE_BORDER_WIDE);
-                table.addCell("Course ID");
-                table.addCell("Title");
-                table.addCell("Instructors");
-                table.addCell("Requirements");
-                table.addCell("Start Date");
+                if (foundCourse.isPresent()) {
+                    Table table = new Table(5, BorderStyle.UNICODE_BOX_DOUBLE_BORDER_WIDE);
+                    table.addCell("Course ID");
+                    table.addCell("Title");
+                    table.addCell("Instructors");
+                    table.addCell("Requirements");
+                    table.addCell("Start Date");
 
-                Course course = foundCourse.get();
-                table.addCell(String.valueOf(course.getId()));
-                table.addCell(course.getTitle());
-                table.addCell(String.join(", ", course.getInstructorName()));
-                table.addCell(String.join(", ", course.getRequirement()));
-                table.addCell(course.getStartDate().toString());
+                    Course course = foundCourse.get();
+                    table.addCell(String.valueOf(course.getId()));
+                    table.addCell(course.getTitle());
+                    table.addCell(String.join(", ", course.getInstructorName()));
+                    table.addCell(String.join(", ", course.getRequirement()));
+                    table.addCell(course.getStartDate().toString());
 
-                System.out.println("Found course:");
-                System.out.println(table.render());
+                    System.out.println("Found course:");
+                    System.out.println(table.render());
+                } else {
+                    System.out.println("No course found with title: " + titleToFind);
+                }
             } else {
-                System.out.println("No course found with title: " + titleToFind);
+                System.out.println("No input provided.");
             }
         } catch (Exception e) {
             System.out.println("An error occurred: " + e.getMessage());
         }
-        // Close the scanner after we're done with it
     }
+
+
 
 }
 
