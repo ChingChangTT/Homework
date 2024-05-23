@@ -1,5 +1,6 @@
 package src.service;
 
+import src.exception.CourseNotFoundException;
 import src.model.Course;
 
 import java.io.IOException;
@@ -11,7 +12,7 @@ public interface AllFunction {
 
     void findCourse();
 
-    void deleteCourse() ;
+    void deleteCourse() throws CourseNotFoundException;
 
     void findCourseByTitle();
 

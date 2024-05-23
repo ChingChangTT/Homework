@@ -2,6 +2,7 @@ package src.respository;
 
 import org.nocrala.tools.texttablefmt.BorderStyle;
 import org.nocrala.tools.texttablefmt.Table;
+import src.exception.CourseNotFoundException;
 import src.model.Course;
 import src.service.AllFunction;
 
@@ -78,17 +79,14 @@ class CourseManager implements AllFunction {
                 table.addCell(String.join(", ", course.getInstructorName()));
                 table.addCell(String.join(", ", course.getRequirement()));
 
-                // Format the course's start date to a String in "yyyy-MM-dd HH:mm" format
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
                 String formattedNow = now.format(formatter);
-
-                // Add the formatted current date and time to the table
                 table.addCell(formattedNow);
             }
 
             System.out.println(table.render());
             for (Course course : courseList) {
-                course.setStartDate(now); // Assuming Course class has a setter for startDate
+                course.setStartDate(now);
             }
 
         } catch (IOException e) {
@@ -100,8 +98,6 @@ class CourseManager implements AllFunction {
         long startTime = System.currentTimeMillis();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath,true))) {
             for (Course course : courses) {
-                // Assuming course.getStartDate() returns a LocalDateTime object
-                // Convert LocalDateTime to String with hours, minutes, and seconds
                 String formattedStartDate = course.getStartDate().toString();
                 writer.write(course.getId() + "/" +
                         course.getTitle() + "/" +
@@ -180,21 +176,14 @@ class CourseManager implements AllFunction {
         if (foundCourse.isPresent()) {
             // Create a table to display the found course
             var table = new Table(5, BorderStyle.UNICODE_BOX_DOUBLE_BORDER_WIDE);
-            table.addCell("Course ID");
-            table.addCell("Title");
-            table.addCell("Instructors");
-            table.addCell("Requirements");
-            table.addCell("Start Date");
+            for (String s : Arrays.asList("Course ID", "Title", "Instructors", "Requirements", "Start Date")) {
+                table.addCell(s);
+            }
+            var course = foundCourse.get();
+            for (String s : Arrays.asList(String.valueOf(course.getId()), course.getTitle(), String.join(", ", course.getInstructorName()), String.join(", ", course.getRequirement()), course.getStartDate().toString())) {
+                table.addCell(s);
+            }
 
-            // Add the found course to the table
-            Course course = foundCourse.get();
-            table.addCell(String.valueOf(course.getId()));
-            table.addCell(course.getTitle());
-            table.addCell(String.join(", ", course.getInstructorName()));
-            table.addCell(String.join(", ", course.getRequirement()));
-            table.addCell(course.getStartDate().toString()); // Assuming getStartDate() returns LocalDateTime
-
-            // Display the table
             System.out.println("Found course:");
             System.out.println(table.render());
         } else {
@@ -202,7 +191,7 @@ class CourseManager implements AllFunction {
         }
     }
     @Override
-    public void deleteCourse() {
+    public void deleteCourse() throws CourseNotFoundException {
         Scanner scanner = new Scanner(System.in);
 
         System.out.print("Enter the course ID to delete: ");
@@ -236,8 +225,11 @@ class CourseManager implements AllFunction {
                             formattedStartDate + System.lineSeparator());
                 }
                 System.out.println("Course list updated successfully.");
+            } catch (CharConversionException e) {
+//                System.out.println("Error writing to file: " + e.getMessage());
+                throw new CourseNotFoundException("Course not found with ID: " + e.getMessage());
             } catch (IOException e) {
-                System.out.println("Error writing to file: " + e.getMessage());
+                throw new RuntimeException(e);
             }
             System.out.println("Courses after deletion:");
             displayCourses(FILE_PATH);
@@ -246,37 +238,40 @@ class CourseManager implements AllFunction {
         }
     }
     @Override
-    public void findCourseByTitle(){
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter the title of the course to search: ");
-        String title = scanner.nextLine().trim();
-        scanner.close();
+    public void findCourseByTitle() {
+        try (Scanner scanner = new Scanner(System.in)) {
+            System.out.print("Enter the course title to find: ");
+            String titleToFind = scanner.nextLine();
+            List<Course> courseList = readCoursesFromFile(FILE_PATH);
 
-        List<Course> matchingCourses = new ArrayList<>();
-        for (Course course : courses) {
-            if (course.getTitle().equalsIgnoreCase(title)) {
-                matchingCourses.add(course);
-            }
-        }
-        if (!matchingCourses.isEmpty()) {
-            // Display matching courses in a table
-            Table table = new Table(5, BorderStyle.UNICODE_BOX_DOUBLE_BORDER_WIDE);
-            table.addCell("Course ID");
-            table.addCell("Title");
-            table.addCell("Instructors");
-            table.addCell("Requirements");
-            table.addCell("Start Date");
-            for (Course course : matchingCourses) {
+            Optional<Course> foundCourse = courseList.stream()
+                    .filter(c -> c.getTitle().equalsIgnoreCase(titleToFind))
+                    .findFirst();
+
+            if (foundCourse.isPresent()) {
+                Table table = new Table(5, BorderStyle.UNICODE_BOX_DOUBLE_BORDER_WIDE);
+                table.addCell("Course ID");
+                table.addCell("Title");
+                table.addCell("Instructors");
+                table.addCell("Requirements");
+                table.addCell("Start Date");
+
+                Course course = foundCourse.get();
                 table.addCell(String.valueOf(course.getId()));
                 table.addCell(course.getTitle());
                 table.addCell(String.join(", ", course.getInstructorName()));
                 table.addCell(String.join(", ", course.getRequirement()));
-                table.addCell(course.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                table.addCell(course.getStartDate().toString());
+
+                System.out.println("Found course:");
+                System.out.println(table.render());
+            } else {
+                System.out.println("No course found with title: " + titleToFind);
             }
-            System.out.println("Matching courses:");
-            System.out.println(table.render());
-        } else {
-            System.out.println("No courses found with the title: " + title);
         }
     }
+
 }
+
+
+

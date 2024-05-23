@@ -5,3 +5,8 @@ public class CourseNotFoundException extends Exception {
         super(message);
     }
 }
+ class InvalidInputException extends Exception {
+    public InvalidInputException(String message) {
+        super(message);
+    }
+}

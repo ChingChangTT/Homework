@@ -1,5 +1,7 @@
 package src.respository;
 
+import src.exception.CourseNotFoundException;
+
 public class AllMethod extends CourseManager {
     static CourseManager md = new CourseManager();
 
@@ -23,7 +25,7 @@ public class AllMethod extends CourseManager {
         md.findCourseByTitle();
     }
 
-    public static void deleteById() {
+    public static void deleteById() throws CourseNotFoundException {
         md.deleteCourse();
     }
 

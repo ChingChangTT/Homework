@@ -1,11 +1,12 @@
 package src.view;
 
+import src.exception.CourseNotFoundException;
 import src.respository.AllMethod;
 
 import java.util.Scanner;
 
 public class CheckProcess extends AllMethod {
-    public static void process() {
+    public static void process() throws CourseNotFoundException {
         Scanner scanner = new Scanner(System.in);
         int choice;
         do {

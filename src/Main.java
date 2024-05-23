@@ -1,9 +1,10 @@
 package src;
 
+import src.exception.CourseNotFoundException;
 import src.view.CheckProcess;
 
 public class Main  {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws CourseNotFoundException {
         System.out.println("""
 
 
