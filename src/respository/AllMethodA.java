@@ -268,7 +268,10 @@ class CourseManager implements AllFunction {
             } else {
                 System.out.println("No course found with title: " + titleToFind);
             }
+        } catch (Exception e) {
+            System.out.println("An error occurred: " + e.getMessage());
         }
+        // Close the scanner after we're done with it
     }
 
 }
